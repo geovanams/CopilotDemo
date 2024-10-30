@@ -62,3 +62,18 @@ resource "null_resource" "docker_api-userprofile" {
     command = "az acr build --image devopsoh/api-userprofile:${local.apiuserprofile_base_image_tag} --registry ${azurerm_container_registry.container_registry.login_server} --build-arg build_version=${local.apiuserprofile_base_image_tag} --file ../../apis/userprofile/Dockerfile ../../apis/userprofile"
   }
 }
+
+# Azure Web App
+resource "azurerm_app_service" "webapp" {
+  name                = "webapp-${var.environment}"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  app_service_plan_id = azurerm_app_service_plan.app_service_plan.id
+  app_settings = {
+    "WEBSITE_RUN_FROM_PACKAGE" = "1"
+    "WEBSITE_NODE_DEFAULT_VERSION" = "10.14.1"
+  }
+  site_config {
+    linux_fx_version = "DOCKER|devopsoh/tripviewer:latest"
+  }
+}
